@@ -1,0 +1,108 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Button } from 'reactstrap';
+
+class Tile extends React.Component {
+
+}
+
+class Grid extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tiles: initializeGrid(),
+      guessTiles: [],
+      matchTiles: [],
+      score: 0,
+    }
+  }
+
+  initializeGrid() {
+    var grid = [
+      {value: 'A', flipped: false, matched: false},
+      {value: 'A', flipped: false, matched: false},
+      {value: 'B', flipped: false, matched: false},
+      {value: 'B', flipped: false, matched: false},
+      {value: 'C', flipped: false, matched: false},
+      {value: 'C', flipped: false, matched: false},
+      {value: 'D', flipped: false, matched: false},
+      {value: 'D', flipped: false, matched: false},
+      {value: 'E', flipped: false, matched: false},
+      {value: 'E', flipped: false, matched: false},
+      {value: 'F', flipped: false, matched: false},
+      {value: 'F', flipped: false, matched: false},
+      {value: 'G', flipped: false, matched: false},
+      {value: 'G', flipped: false, matched: false},
+      {value: 'H', flipped: false, matched: false},
+      {value: 'H', flipped: false, matched: false}
+    ]
+
+    var temp;
+    var index;
+    for (var i = 0; i < 16; i++) {
+      index = Math.floor(Math.random() * 16);
+      temp = grid[i];
+      grid[i] = grid[index];
+      grid[index] = temp;
+    }
+
+    return grid;
+  }
+
+  handleClick(i) {
+    const tiles = this.state.tiles.slice();
+    const score = this.state.score;
+
+    if (gameWon(tiles)) {
+      return;
+    }
+
+    if (!tiles[i].matched) {
+      // increment the click score
+      score = score + 1;
+      // indicate tile's value is visible
+      tiles[i].flipped = true;
+      // add this tile to the current guess
+      this.state.guessTiles.push(tiles[i]);
+
+      // if two tiles are flipped, evaluate the guess
+      if (this.state.guessTiles.length == 2) {
+	// let the user see tiles for 1 sec before evaluation
+        setTimeout(evaluateGuess, 1000);
+      }
+
+      // set the new state
+      this.setState({
+	tiles: tiles,
+        guessTiles: this.state.guessTiles,
+        matchTiles: this.state.matchTiles,
+        score: score
+      })
+    } else {
+      // maybe a message about clicking a matched tile
+    }
+  }
+
+  evaluateGuess() {
+    const guessTiles = this.state.guessTiles.slice();
+    const matchTiles = this.state.matchTiles.slice();
+
+    // determine a match
+    if (guessTiles[0].value === guessTiles[1].value) {
+      // yes match
+      // add tiles to correct match array, remove guesses
+      for (var i = 0; i < 2; i++) {
+        guessTiles[0].matched = true;
+        matchTiles.push(guessTiles.shift());
+      }
+    }
+    else {
+      // no match
+      // flip tiles to hidden state, remove guesses
+      for (var i = 0l i < 2; i++) {
+	guessTiles[0].flipped = false;
+        guessTiles.shift();
+      }
+    }
+  }
+}
